@@ -3,5 +3,5 @@
 from buildlight import HudsonBuildLight
 
 if __name__ == '__main__':
-    build_light = HudsonBuildLight(host='127.0.0.1', port=8080, job='your-job-here')
+    build_light = HudsonBuildLight(host='127.0.0.1', port=8080, jobs=['your-job-here'])
     build_light.loop()

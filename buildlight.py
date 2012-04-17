@@ -11,7 +11,7 @@ try:
 except Exception:
 	pass # only required for mac os
 
-class UsbLedLinux:    
+class UsbLedLinux:
     
     def __init__(self):
         usbled_devices_folder = '/sys/bus/usb/drivers/usbled/'
@@ -20,7 +20,7 @@ class UsbLedLinux:
             print 'No device found'
             sys.exit(1)
         self.device_folder = usbled_devices_folder + devices[0] + '/'
-    
+
     def set_light(self, color, status):
         f = open(self.device_folder + color, "w")
         f.write(str(status))
@@ -58,14 +58,14 @@ class UsbLedMac:
                                    wValue=(0x02 * 0x100) + 0x0a,
                                    wIndex=0xff & (~color),
                                    data_or_wLength=0x00000008)
-
+        
         # a pipe error is thrown even if the operation is successful
-        except usb.core.USBError: 
+        except usb.core.USBError:
             pass
-    
+
     def red(self):
         self.send(0x02)
-    
+
     def green(self):
         self.send(0x01)
 
@@ -76,17 +76,16 @@ class UsbLedMac:
         self.send(0x00)
 
 class HudsonBuildLight:
-        
-    def __init__(self, host, port, job):
+    def __init__(self, host, port, jobs):
         self.host = host
         self.port = port
-        self.job = job
+        self.jobs = jobs
         self.usbled = self.get_usbled()
         
         # not mapped colors will default to blue
         # other colors returned by hudson: blue_anime red_anime grey grey_anime aborted
-        self.color_map = { 'blue':'green', 'red':'red' }
-        self.default_color = 'blue'
+        self.color_map = { 'blue':'green', 'red':'red', 'green':'green' }
+        self.default_color = 'red'
 
     def get_usbled(self):
         platform = os.uname()[0].lower()
@@ -96,20 +95,28 @@ class HudsonBuildLight:
             sys.exit(1)
         return usbled_platform_map[platform]()
 
-    def get_job_color(self):
+    def get_job_color(self,job):
         try:
             conn = httplib.HTTPConnection(self.host, self.port)
-            conn.request('GET','/job/%s/api/python' % self.job)
-            job = eval(conn.getresponse().read())
+            conn.request('GET','/job/%s/api/python' % job)
+            jobdata = eval(conn.getresponse().read())
         except Exception:
             return self.default_color
-
-        job_color = job['color']
+        
+        job_color = jobdata['color']
         if self.color_map.has_key(job_color):
             return self.color_map[job_color]
         else:
             return self.default_color
-        
+
+    def get_color(self):
+        colors = map((lambda job: self.get_job_color(job)),self.jobs)
+        print colors
+        if(all(colors[0] == i for i in colors)):
+            return colors[0]
+        else:
+	        return self.default_color
+
     def set_usbled_color(self, color):
         methods_map = { 'red':self.usbled.red, 'green':self.usbled.green, 'blue':self.usbled.blue, 'off':self.usbled.off }
         method = methods_map[color]
@@ -117,10 +124,10 @@ class HudsonBuildLight:
 
     def loop(self):
         self.set_usbled_color(self.default_color)
-        last_color = self.get_job_color()
+        last_color = self.get_color()
         self.set_usbled_color(last_color)
         while True:
-            color = self.get_job_color()
+            color = self.get_color()
             if color != last_color:
                 self.set_usbled_color(color)
                 last_color = color
