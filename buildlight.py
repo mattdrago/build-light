@@ -111,7 +111,6 @@ class HudsonBuildLight:
 
     def get_color(self):
         colors = map((lambda job: self.get_job_color(job)),self.jobs)
-        print colors
         if(all(colors[0] == i for i in colors)):
             return colors[0]
         else:
