@@ -114,7 +114,7 @@ class HudsonBuildLight:
         if(all(colors[0] == i for i in colors)):
             return colors[0]
         else:
-	        return self.default_color
+	    return self.default_color
 
     def set_usbled_color(self, color):
         methods_map = { 'red':self.usbled.red, 'green':self.usbled.green, 'blue':self.usbled.blue, 'off':self.usbled.off }
