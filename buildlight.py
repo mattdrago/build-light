@@ -61,11 +61,11 @@ class HudsonBuildLight:
 
     def get_usbled(self):
         platform = os.uname()[0].lower()
-        usbled_platform_map = { 'darwin':UsbLedGen1, 'linux':UsbLedGen1 }
-        if platform not in usbled_platform_map.keys():
+        supported_platforms = [ 'darwin', 'linux' ]
+        if platform not in supported_platforms:
             print 'this platform (%s) is not supported' % platform
             sys.exit(1)
-        return usbled_platform_map[platform]()
+        return UsbLedGen1()
 
     def get_job_color(self,job):
         try:
