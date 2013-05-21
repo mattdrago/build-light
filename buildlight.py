@@ -11,7 +11,7 @@ try:
 except Exception:
 	pass # only required for mac os
 
-class UsbLedMac:
+class UsbLedGen1:
     
     def __init__(self):
         self.dev = usb.core.find(idVendor=0x0fc5, idProduct=0x1223)
@@ -58,7 +58,7 @@ class HudsonBuildLight:
 
     def get_usbled(self):
         platform = os.uname()[0].lower()
-        usbled_platform_map = { 'darwin':UsbLedMac, 'linux':UsbLedMac }
+        usbled_platform_map = { 'darwin':UsbLedGen1, 'linux':UsbLedGen1 }
         if platform not in usbled_platform_map.keys():
             print 'this platform (%s) is not supported' % platform
             sys.exit(1)
