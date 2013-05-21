@@ -11,38 +11,6 @@ try:
 except Exception:
 	pass # only required for mac os
 
-class UsbLedLinux:
-    
-    def __init__(self):
-        usbled_devices_folder = '/sys/bus/usb/drivers/usbled/'
-        devices = filter(lambda f: re.match('[0-9]', f), os.listdir(usbled_devices_folder))
-        if len(devices)==0:
-            print 'No device found'
-            sys.exit(1)
-        self.device_folder = usbled_devices_folder + devices[0] + '/'
-
-    def set_light(self, color, status):
-        f = open(self.device_folder + color, "w")
-        f.write(str(status))
-        f.close()
-
-    def red(self):
-        self.off()
-        self.set_light('red', 1)
-
-    def green(self):
-        self.off()
-        self.set_light('green', 1)
-
-    def blue(self):
-        self.off()
-        self.set_light('blue', 1)
-
-    def off(self):
-        self.set_light("blue", 0)
-        self.set_light("green", 0)
-        self.set_light("red", 0)
-
 class UsbLedMac:
     
     def __init__(self):
