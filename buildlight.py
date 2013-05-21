@@ -49,6 +49,7 @@ class UsbLedMac:
         self.dev = usb.core.find(idVendor=0x0fc5, idProduct=0x1223)
         if self.dev is None:
             raise ValueError('Device not found')
+        self.dev.detach_kernel_driver(0)
         self.dev.set_configuration()
 
     def send(self, color):
@@ -89,7 +90,7 @@ class HudsonBuildLight:
 
     def get_usbled(self):
         platform = os.uname()[0].lower()
-        usbled_platform_map = { 'darwin':UsbLedMac, 'linux':UsbLedLinux }
+        usbled_platform_map = { 'darwin':UsbLedMac, 'linux':UsbLedMac }
         if platform not in usbled_platform_map.keys():
             print 'this platform (%s) is not supported' % platform
             sys.exit(1)
