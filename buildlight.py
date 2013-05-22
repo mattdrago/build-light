@@ -4,6 +4,7 @@ import time
 import os
 import sys
 import re
+import atexit
 
 try:
 	import usb.core
@@ -22,6 +23,8 @@ class UsbLedGen1:
             self.dev.detach_kernel_driver(0)
 
         self.dev.set_configuration()
+
+	atexit.register(self.off)
 
     def send(self, color):
         try:
