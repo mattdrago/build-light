@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import atexit
 from buildlight import HudsonBuildLight
 
 if __name__ == '__main__':

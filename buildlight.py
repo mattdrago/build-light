@@ -1,9 +1,7 @@
-
 import httplib
 import time
 import os
 import sys
-import re
 import atexit
 
 try:
