@@ -83,11 +83,12 @@ class UsbLedGen2(UsbLed):
             pass
 
 class UsbLedFinder:
-    def __init__(self):
+    def __init__(self, ledAddress):
         self.supported_platforms = ['darwin', 'linux']
 	self.current_platform = os.uname()[0].lower()
 	self.idVendor = 0x0fc5
 	self.supportedIdProductsMap = { 0x1223: UsbLedGen1, 0xb080: UsbLedGen2 }
+	self.ledAddress = ledAddress
 
     def is_current_platform_supported(self):
 	return platform in self.supported_platforms
@@ -102,20 +103,23 @@ class UsbLedFinder:
 	    sys.exit(1)
 
     def attached_device_product_id(self):
-        device = usb.core.find(idVendor=0x0fc5)
+        if self.ledAddress is None:
+            devices = usb.core.find(find_all=True, idVendor=0x0fc5)
+	else:
+            devices = usb.core.find(find_all=True, idVendor=0x0fc5, address=self.ledAddress)
 
-	if device is None:
+	if len(devices) == 0:
 	    print 'No devices found.  Exiting'
 	    sys.exit(1)
 	else:
-	    return device.idProduct
+	    return devices[0].idProduct
 
 class HudsonBuildLight:
-    def __init__(self, host, port, jobs):
+    def __init__(self, host, port, jobs, ledAddress=None):
         self.host = host
         self.port = port
         self.jobs = jobs
-        self.usbled = UsbLedFinder().get_usbled()
+        self.usbled = UsbLedFinder(ledAddress).get_usbled()
         
         # not mapped colors will default to blue
         # other colors returned by hudson: blue_anime red_anime grey grey_anime aborted
