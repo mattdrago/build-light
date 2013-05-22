@@ -47,6 +47,22 @@ class UsbLedGen1:
     def off(self):
         self.send(0x00)
 
+class UsbLedFinder:
+    def __init__(self):
+        self.supported_platforms = ['darwin', 'linux']
+	self.idVendor = 0x0fc5
+	self.supportedIdProductsMap = { 0x1223: UsbLedGen1 }
+
+    def is_current_platform_supported(self):
+        platform = os.uname()[0].lower()
+	return platform in self.supported_platforms
+
+    def get_usbled(self):
+        if(self.is_current_platform_supported):
+	    return UsbLedGen1()
+        else:
+	    return None
+
 class HudsonBuildLight:
     def __init__(self, host, port, jobs):
         self.host = host
@@ -60,12 +76,11 @@ class HudsonBuildLight:
         self.default_color = 'red'
 
     def get_usbled(self):
-        platform = os.uname()[0].lower()
-        supported_platforms = [ 'darwin', 'linux' ]
-        if platform not in supported_platforms:
+        usbLedFinder = UsbLedFinder()
+	if usbLedFinder.is_current_platform_supported is False:
             print 'this platform (%s) is not supported' % platform
             sys.exit(1)
-        return UsbLedGen1()
+        return usbLedFinder.get_usbled()
 
     def get_job_color(self,job):
         try:
