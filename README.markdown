@@ -11,7 +11,7 @@ To configure the script for your hudson instance, change the following line in r
 
     build_light = HudsonBuildLight(host='127.0.0.1', port=8080, job='your-job-here')
 
-This script has been tested only on a generation 1 Delcom USB Visual Signal Indicator (804005)
+This script has been tested on generation 1 and 2 Delcom USB Visual Signal Indicator (in particular 804028 and 904005-SB)
 
 To be able to run this script as a non-root user, setup a udev rule for Delcom devices.  Make sure to re-attach the devices after copying the rules file.
 

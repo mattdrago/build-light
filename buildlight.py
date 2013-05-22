@@ -53,22 +53,76 @@ class UsbLedGen1:
         if color in self.color_method_map.keys():
 	    self.color_method_map[color]()
 
+class UsbLedGen2:
+    
+    def __init__(self):
+        self.color_method_map = { 'red':self.red, 'green':self.green, 'blue':self.blue, 'off':self.off }
+        self.dev = usb.core.find(idVendor=0x0fc5, idProduct=0xb080)
+        if self.dev is None:
+            raise ValueError('Device not found')
+
+        if self.dev.is_kernel_driver_active(0) is True:
+            self.dev.detach_kernel_driver(0)
+
+        self.dev.set_configuration()
+
+	atexit.register(self.off)
+
+    def send(self, color):
+        try:
+            self.dev.ctrl_transfer(bmRequestType=0x21,
+                                   bRequest= 0x09,
+                                   wValue=0x0635,
+                                   wIndex=0x000,
+                                   data_or_wLength='\x65\x0c' + chr(color) + '\xff\x00\x00\x00\x00')
+        
+        # a pipe error is thrown even if the operation is successful
+        except usb.core.USBError:
+            pass
+
+    def red(self):
+        self.send(0x02)
+
+    def green(self):
+        self.send(0x01)
+
+    def blue(self):
+        self.send(0x04)
+
+    def off(self):
+        self.send(0x00)
+
+    def set_color(self, color):
+        if color in self.color_method_map.keys():
+	    self.color_method_map[color]()
+
 class UsbLedFinder:
     def __init__(self):
         self.supported_platforms = ['darwin', 'linux']
 	self.current_platform = os.uname()[0].lower()
 	self.idVendor = 0x0fc5
-	self.supportedIdProductsMap = { 0x1223: UsbLedGen1 }
+	self.supportedIdProductsMap = { 0x1223: UsbLedGen1, 0xb080: UsbLedGen2 }
 
     def is_current_platform_supported(self):
 	return platform in self.supported_platforms
 
     def get_usbled(self):
         if(self.is_current_platform_supported):
-	    return UsbLedGen1()
+	    deviceProductId = self.attached_device_product_id()
+	    if deviceProductId in self.supportedIdProductsMap:
+	        return self.supportedIdProductsMap[deviceProductId]()
         else:
 	    print 'This platform (%s) is not supported' % self.platform
 	    sys.exit(1)
+
+    def attached_device_product_id(self):
+        device = usb.core.find(idVendor=0x0fc5)
+
+	if device is None:
+	    print 'No devices found.  Exiting'
+	    sys.exit(1)
+	else:
+	    return device.idProduct
 
 class HudsonBuildLight:
     def __init__(self, host, port, jobs):
