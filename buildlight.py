@@ -69,16 +69,12 @@ class HudsonBuildLight:
         self.host = host
         self.port = port
         self.jobs = jobs
-        self.usbled = self.get_usbled()
+        self.usbled = UsbLedFinder().get_usbled()
         
         # not mapped colors will default to blue
         # other colors returned by hudson: blue_anime red_anime grey grey_anime aborted
         self.color_map = { 'blue':'green', 'blue_anime':'green', 'red':'red', 'red_anime':'red', 'green':'green' }
         self.default_color = 'red'
-
-    def get_usbled(self):
-        usbLedFinder = UsbLedFinder()
-        return usbLedFinder.get_usbled()
 
     def get_job_color(self,job):
         try:
