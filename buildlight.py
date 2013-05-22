@@ -10,10 +10,32 @@ try:
 except Exception:
 	pass # only required for mac os
 
-class UsbLedGen1:
-    
+class UsbLed:
     def __init__(self):
         self.color_method_map = { 'red':self.red, 'green':self.green, 'blue':self.blue, 'off':self.off }
+
+	atexit.register(self.off)
+
+    def red(self):
+        self.send(0x02)
+
+    def green(self):
+        self.send(0x01)
+
+    def blue(self):
+        self.send(0x04)
+
+    def off(self):
+        self.send(0x00)
+
+    def set_color(self, color):
+        if color in self.color_method_map.keys():
+	    self.color_method_map[color]()
+
+class UsbLedGen1(UsbLed):
+    
+    def __init__(self):
+        UsbLed.__init__(self)
         self.dev = usb.core.find(idVendor=0x0fc5, idProduct=0x1223)
         if self.dev is None:
             raise ValueError('Device not found')
@@ -22,8 +44,6 @@ class UsbLedGen1:
             self.dev.detach_kernel_driver(0)
 
         self.dev.set_configuration()
-
-	atexit.register(self.off)
 
     def send(self, color):
         try:
@@ -37,26 +57,10 @@ class UsbLedGen1:
         except usb.core.USBError:
             pass
 
-    def red(self):
-        self.send(0x02)
-
-    def green(self):
-        self.send(0x01)
-
-    def blue(self):
-        self.send(0x04)
-
-    def off(self):
-        self.send(0x00)
-
-    def set_color(self, color):
-        if color in self.color_method_map.keys():
-	    self.color_method_map[color]()
-
-class UsbLedGen2:
+class UsbLedGen2(UsbLed):
     
     def __init__(self):
-        self.color_method_map = { 'red':self.red, 'green':self.green, 'blue':self.blue, 'off':self.off }
+        UsbLed.__init__(self)
         self.dev = usb.core.find(idVendor=0x0fc5, idProduct=0xb080)
         if self.dev is None:
             raise ValueError('Device not found')
@@ -65,8 +69,6 @@ class UsbLedGen2:
             self.dev.detach_kernel_driver(0)
 
         self.dev.set_configuration()
-
-	atexit.register(self.off)
 
     def send(self, color):
         try:
@@ -79,22 +81,6 @@ class UsbLedGen2:
         # a pipe error is thrown even if the operation is successful
         except usb.core.USBError:
             pass
-
-    def red(self):
-        self.send(0x02)
-
-    def green(self):
-        self.send(0x01)
-
-    def blue(self):
-        self.send(0x04)
-
-    def off(self):
-        self.send(0x00)
-
-    def set_color(self, color):
-        if color in self.color_method_map.keys():
-	    self.color_method_map[color]()
 
 class UsbLedFinder:
     def __init__(self):
