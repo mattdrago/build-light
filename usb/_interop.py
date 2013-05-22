@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2010 Wander Lairson Costa 
+# Copyright (C) 2009-2011 Wander Lairson Costa 
 # 
 # The following terms apply to all files associated
 # with the software unless explicitly disclaimed in individual files.
@@ -32,6 +32,7 @@
 # hack we need to do, this makes maintenance easier... ^^
 
 import sys
+import array
 
 __all__ = ['_reduce', '_set', '_next', '_groupby', '_sorted', '_update_wrapper']
 
@@ -121,3 +122,17 @@ except (ImportError, AttributeError):
         wrapper.__module__ = wrapped.__module__
         wrapper.__doc__ = wrapped.__doc__
         wrapper.__dict__ = wrapped.__dict__
+
+def as_array(data=None):
+    if data is None:
+        return array.array('B')
+    try:
+        return array.array('B', data)
+    except TypeError:
+        # When you pass a unicode string or a character sequence,
+        # you get a TypeError if first parameter does not match
+        try:
+            return array.array('c', data)
+        except TypeError:
+            return array.array('u', data)
+

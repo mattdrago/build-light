@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2010 Wander Lairson Costa 
+# Copyright (C) 2009-2011 Wander Lairson Costa 
 # 
 # The following terms apply to all files associated
 # with the software unless explicitly disclaimed in individual files.
@@ -185,6 +185,17 @@ class IBackend(object):
         bConfigurationValue field of the related configuration descriptor.
         """
         _not_implemented(self.set_configuration)
+
+    def get_configuration(self, dev_handle):
+        r"""Get the current active device configuration.
+
+        This method returns the bConfigurationValue of the currently
+        active configuration. Depending on the backend and the OS,
+        either a cached value may be returned or a control request may
+        be issued. The dev_handle parameter is the value returned by
+        the open_device method.
+        """
+        _not_implemented(self.get_configuration)
 
     def set_interface_altsetting(self, dev_handle, intf, altsetting):
         r"""Set the interface alternate setting.

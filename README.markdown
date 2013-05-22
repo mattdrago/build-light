@@ -17,7 +17,7 @@ To be able to run this script as a non-root user, setup a udev rule for Delcom d
 
     sudo cp 70-delcom.rules /etc/udev/rules.d/ 
 
-Bundled PyUSB is 1.0.0-a0
+Bundled PyUSB is 1.0.0a3
 
 References for libusb code: 
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2009-2010 Wander Lairson Costa 
+# Copyright (C) 2009-2011 Wander Lairson Costa 
 # 
 # The following terms apply to all files associated
 # with the software unless explicitly disclaimed in individual files.
@@ -29,9 +29,11 @@
 import usb.core as core
 import usb.util as util
 import usb._interop as _interop
-from usb.core import USBError
+import usb.control as control
 
 __author__ = 'Wander Lairson Costa'
+
+USBError = core.USBError
 
 CLASS_AUDIO = 1
 CLASS_COMM = 2
@@ -209,7 +211,10 @@ class DeviceHandle(object):
         Arguments:
             endpoint: endpoint number.
         """
-        raise NotImplemented('This function has not been implemented yet')
+        cfg = self.dev.get_active_configuration()
+        intf = util.find_descriptor(cfg, bInterfaceNumber = self.__claimed_interface)
+        e = util.find_descriptor(intf, bEndpointAddress = endpoint)
+        control.clear_feature(self.dev, control.ENDPOINT_HALT, e)
 
     def claimInterface(self, interface):
         r"""Claims the interface with the Operating System.
@@ -217,8 +222,13 @@ class DeviceHandle(object):
         Arguments:
             interface: interface number or an Interface object.
         """
-        util.claim_interface(self.dev, interface)
-        self.__claimed_interface = interface
+        if isinstance(interface, Interface):
+            if_num = interface.interfaceNumber
+        else:
+            if_num = interface
+
+        util.claim_interface(self.dev, if_num)
+        self.__claimed_interface = if_num
 
     def releaseInterface(self):
         r"""Release an interface previously claimed with claimInterface."""
@@ -254,30 +264,29 @@ class DeviceHandle(object):
         """
         self.dev.set_interface_altsetting(self.__claimed_interface, alternate)
 
-    def getString(self, index, len, langid = -1):
+    def getString(self, index, length, langid = None):
         r"""Retrieve the string descriptor specified by index
             and langid from a device.
 
         Arguments:
             index: index of descriptor in the device.
-            len: number of bytes of the string
+            length: number of bytes of the string
             langid: Language ID. If it is omittedi, will be
                     used the first language.
         """
-        raise NotImplemented('This function has not been implemented yet')
+        return util.get_string(self.dev, length, index, langid).encode('ascii')
 
-    def getDescriptor(self, type, index, len, endpoint = -1):
+    def getDescriptor(self, desc_type, desc_index, length, endpoint = -1):
         r"""Retrieves a descriptor from the device identified by the type
         and index of the descriptor.
 
         Arguments:
-            type: descriptor type.
-            index: index of the descriptor.
+            desc_type: descriptor type.
+            desc_index: index of the descriptor.
             len: descriptor length.
-            endpoint: endpoint number from descriptor is read. If it is
-                      omitted, the descriptor is read from default control pipe.
+            endpoint: ignored.
         """
-        raise NotImplemented('This function has not been implemented yet')
+        return control.get_descriptor(self.dev, length, desc_type, desc_index)
 
     def detachKernelDriver(self, interface):
         r"""Detach a kernel driver from the interface (if one is attached,
@@ -294,7 +303,11 @@ class Device(object):
         self.deviceClass = dev.bDeviceClass
         self.deviceSubClass = dev.bDeviceSubClass
         self.deviceProtocol = dev.bDeviceProtocol
-        self.deviceVersion = dev.bcdDevice
+        self.deviceVersion = str((dev.bcdDevice >> 12) & 0xf) + \
+                            str((dev.bcdDevice >> 8) & 0xf) + \
+                            '.' + \
+                            str((dev.bcdDevice >> 4) & 0xf) + \
+                            str(dev.bcdDevice & 0xf)
         self.devnum = None
         self.filename = ''
         self.iManufacturer = dev.iManufacturer
@@ -303,7 +316,11 @@ class Device(object):
         self.idProduct = dev.idProduct
         self.idVendor = dev.idVendor
         self.maxPacketSize = dev.bMaxPacketSize0
-        self.usbVersion = dev.bcdUSB
+        self.usbVersion = str((dev.bcdUSB >> 12) & 0xf) + \
+                         str((dev.bcdUSB >> 8) & 0xf) + \
+                         '.' + \
+                         str((dev.bcdUSB >> 4) & 0xf) + \
+                         str(dev.bcdUSB & 0xf)
         self.configurations = [Configuration(c) for c in dev]
         self.dev = dev
 
@@ -318,7 +335,7 @@ class Bus(object):
     r"""Bus object."""
     def __init__(self):
         self.dirname = ''
-        self.localtion = 0
+        self.location = 0
         self.devices = [Device(d) for d in core.find(find_all=True)]
 
 def busses():
