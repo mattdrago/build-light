@@ -15,6 +15,7 @@ except Exception:
 class UsbLedGen1:
     
     def __init__(self):
+        self.color_method_map = { 'red':self.red, 'green':self.green, 'blue':self.blue, 'off':self.off }
         self.dev = usb.core.find(idVendor=0x0fc5, idProduct=0x1223)
         if self.dev is None:
             raise ValueError('Device not found')
@@ -49,6 +50,10 @@ class UsbLedGen1:
 
     def off(self):
         self.send(0x00)
+
+    def set_color(self, color):
+        if color in self.color_method_map.keys():
+	    self.color_method_map[color]()
 
 class UsbLedFinder:
     def __init__(self):
@@ -100,18 +105,13 @@ class HudsonBuildLight:
         else:
 	    return self.default_color
 
-    def set_usbled_color(self, color):
-        methods_map = { 'red':self.usbled.red, 'green':self.usbled.green, 'blue':self.usbled.blue, 'off':self.usbled.off }
-        method = methods_map[color]
-        method()
-
     def loop(self):
-        self.set_usbled_color(self.default_color)
+        self.usbled.set_color(self.default_color)
         last_color = self.get_color()
-        self.set_usbled_color(last_color)
+        self.usbled.set_color(last_color)
         while True:
             color = self.get_color()
             if color != last_color:
-                self.set_usbled_color(color)
+                self.usbled.set_color(color)
                 last_color = color
             time.sleep(1)
