@@ -13,6 +13,10 @@ To configure the script for your hudson instance, change the following line in r
 
 This script has been tested only on a generation 1 Delcom USB Visual Signal Indicator (804005)
 
+To be able to run this script as a non-root user, setup a udev rule for Delcom devices.  Make sure to re-attach the devices after copying the rules file.
+
+    sudo cp 70-delcom.rules /etc/udev/rules.d/ 
+
 Bundled PyUSB is 1.0.0-a0
 
 References for libusb code: 

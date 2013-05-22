@@ -1,0 +1,4 @@
+SUBSYSTEM !="usb_device", ACTION !="add", GOTO="device_rules_end"
+SYSFS{idVendor} =="0fc5", SYMLINK+="mydevice"
+MODE="0666", OWNER="root", GROUP="root"
+LABEL="device_rules_end"
