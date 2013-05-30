@@ -48,10 +48,10 @@ class UsbLedGen1(UsbLed):
 
 	def send(self, color):
 		try:
-			self.dev.ctrl_transfer(bmRequestType=0x000000c8,
-					bRequest= 0x00000012,
-					wValue=(0x02 * 0x100) + 0x0a,
-					wIndex=0xff & (~color),
+			self.dev.ctrl_transfer(bmRequestType=0xc8,
+					bRequest= 0x12,
+					wValue=(0x0c * 0x100) + 0x0a,
+					wIndex=0xff00 + color,
 					data_or_wLength=0x00000008)
 		
 		# a pipe error is thrown even if the operation is successful
