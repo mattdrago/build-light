@@ -26,16 +26,16 @@ class UsbLed:
 		self.dev.set_configuration()
 
 	def red(self):
-		self.send(0x02)
+		self.led_on(0x02)
 
 	def green(self):
-		self.send(0x01)
+		self.led_on(0x01)
 
 	def blue(self):
-		self.send(0x04)
+		self.led_on(0x04)
 
 	def off(self):
-		self.send(0x00)
+		self.led_on(0x00)
 
 	def set_color(self, color):
 		if color in self.color_method_map.keys():
@@ -46,17 +46,20 @@ class UsbLedGen1(UsbLed):
 	def __init__(self, device):
 		UsbLed.__init__(self, device)
 
-	def send(self, color):
+	def send(self, major_command, minor_command, msb, lsb):
 		try:
 			self.dev.ctrl_transfer(bmRequestType=0xc8,
 					bRequest= 0x12,
-					wValue=(0x0c * 0x100) + 0x0a,
-					wIndex=0xff00 + color,
+					wValue=(minor_command * 0x100) + major_command,
+					wIndex=(lsb * 0x100) + msb,
 					data_or_wLength=0x00000008)
 		
 		# a pipe error is thrown even if the operation is successful
 		except usb.core.USBError:
 			pass
+
+	def led_on(self, color):
+		self.send(major_command=0x0a, minor_command=0x0c, msb=color, lsb=0xff)
 
 class UsbLedGen2(UsbLed):
 	
@@ -74,6 +77,9 @@ class UsbLedGen2(UsbLed):
 		# a pipe error is thrown even if the operation is successful
 		except usb.core.USBError:
 			pass
+
+	def led_on(self, color):
+		self.send(color)
 
 class UsbLedFinder:
 	def __init__(self, ledAddress):
