@@ -98,9 +98,9 @@ class UsbLedFinder:
 
 	def attached_device(self):
 		if self.ledAddress is None:
-			devices = usb.core.find(find_all=True, idVendor=0x0fc5)
+			devices = usb.core.find(find_all=True, idVendor=self.idVendor)
 		else:
-			devices = usb.core.find(find_all=True, idVendor=0x0fc5, address=self.ledAddress)
+			devices = usb.core.find(find_all=True, idVendor=self.idVendor, address=self.ledAddress)
 
 		if len(devices) == 0:
 			print 'No devices found.  Exiting'
