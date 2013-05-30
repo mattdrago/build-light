@@ -11,9 +11,20 @@ except Exception:
 	pass # only required for mac os
 
 class UsbLed:
-	def __init__(self):
+	def __init__(self, idProduct):
 		self.color_method_map = { 'red':self.red, 'green':self.green, 'blue':self.blue, 'off':self.off }
+		self.__register_device(idProduct)
 		atexit.register(self.off)
+
+	def __register_device(self, idProduct):
+		self.dev = usb.core.find(idVendor=0x0fc5, idProduct=idProduct)
+		if self.dev is None:
+			raise ValueError('Device not found')
+
+		if self.dev.is_kernel_driver_active(0) is True:
+			self.dev.detach_kernel_driver(0)
+
+		self.dev.set_configuration()
 
 	def red(self):
 		self.send(0x02)
@@ -34,15 +45,7 @@ class UsbLed:
 class UsbLedGen1(UsbLed):
 	
 	def __init__(self):
-		UsbLed.__init__(self)
-		self.dev = usb.core.find(idVendor=0x0fc5, idProduct=0x1223)
-		if self.dev is None:
-			raise ValueError('Device not found')
-
-		if self.dev.is_kernel_driver_active(0) is True:
-			self.dev.detach_kernel_driver(0)
-
-		self.dev.set_configuration()
+		UsbLed.__init__(self, idProduct=0x1223)
 
 	def send(self, color):
 		try:
@@ -59,15 +62,7 @@ class UsbLedGen1(UsbLed):
 class UsbLedGen2(UsbLed):
 	
 	def __init__(self):
-		UsbLed.__init__(self)
-		self.dev = usb.core.find(idVendor=0x0fc5, idProduct=0xb080)
-		if self.dev is None:
-			raise ValueError('Device not found')
-
-		if self.dev.is_kernel_driver_active(0) is True:
-			self.dev.detach_kernel_driver(0)
-
-		self.dev.set_configuration()
+		UsbLed.__init__(self, idProduct=0xb080)
 
 	def send(self, color):
 		try:
