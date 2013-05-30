@@ -34,6 +34,15 @@ class UsbLed:
 	def blue(self):
 		self.led_on(0x04)
 
+	def red_flash(self):
+		self.led_flash(0x02)
+
+	def green_flash(self):
+		self.led_flash(0x01)
+
+	def blue_flash(self):
+		self.led_flash(0x04)
+
 	def off(self):
 		self.led_on(0x00)
 
@@ -45,6 +54,11 @@ class UsbLedGen1(UsbLed):
 	
 	def __init__(self, device):
 		UsbLed.__init__(self, device)
+
+		# set up the flash cycle duties
+		self.send(major_command=0x0a, minor_command=0x15, msb=0x21, lsb=0x2f)
+		self.send(major_command=0x0a, minor_command=0x16, msb=0x21, lsb=0x2f)
+		self.send(major_command=0x0a, minor_command=0x17, msb=0x21, lsb=0x2f)
 
 	def send(self, major_command, minor_command, msb, lsb):
 		try:
@@ -59,7 +73,16 @@ class UsbLedGen1(UsbLed):
 			pass
 
 	def led_on(self, color):
+		self.all_off()
 		self.send(major_command=0x0a, minor_command=0x0c, msb=color, lsb=0xff)
+
+	def all_off(self):
+		self.send(major_command=0x0a, minor_command=0x0c, msb=0x00, lsb=0xff)
+		self.send(major_command=0x0a, minor_command=0x14, msb=0xff, lsb=0x00)
+
+	def led_flash(self, color):
+		self.all_off()
+		self.send(major_command=0x0a, minor_command=0x14, msb=0x00, lsb=color)
 
 class UsbLedGen2(UsbLed):
 	
@@ -79,6 +102,13 @@ class UsbLedGen2(UsbLed):
 			pass
 
 	def led_on(self, color):
+		self.send(color)
+
+	def all_off(self):
+		self.send(0x00)
+
+	def led_flash(self, color):
+		self.all_off()
 		self.send(color)
 
 class UsbLedFinder:
