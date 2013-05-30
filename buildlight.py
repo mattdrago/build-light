@@ -11,15 +11,15 @@ except Exception:
 	pass # only required for mac os
 
 class UsbLed:
-	def __init__(self, idProduct):
+	def __init__(self, device):
 		self.color_method_map = { 'red':self.red, 'green':self.green, 'blue':self.blue, 'off':self.off }
-		self.__register_device(idProduct)
+		self.dev = device
+		self.__register_device()
 		atexit.register(self.off)
 
-	def __register_device(self, idProduct):
-		self.dev = usb.core.find(idVendor=0x0fc5, idProduct=idProduct)
+	def __register_device(self):
 		if self.dev is None:
-			raise ValueError('Device not found')
+			raise ValueError('Device must be supplied')
 
 		if self.dev.is_kernel_driver_active(0) is True:
 			self.dev.detach_kernel_driver(0)
@@ -44,8 +44,8 @@ class UsbLed:
 
 class UsbLedGen1(UsbLed):
 	
-	def __init__(self):
-		UsbLed.__init__(self, idProduct=0x1223)
+	def __init__(self, device):
+		UsbLed.__init__(self, device)
 
 	def send(self, color):
 		try:
@@ -61,8 +61,8 @@ class UsbLedGen1(UsbLed):
 
 class UsbLedGen2(UsbLed):
 	
-	def __init__(self):
-		UsbLed.__init__(self, idProduct=0xb080)
+	def __init__(self, device):
+		UsbLed.__init__(self, device)
 
 	def send(self, color):
 		try:
@@ -89,14 +89,14 @@ class UsbLedFinder:
 
 	def get_usbled(self):
 		if(self.is_current_platform_supported):
-			deviceProductId = self.attached_device_product_id()
-			if deviceProductId in self.supportedIdProductsMap:
-				return self.supportedIdProductsMap[deviceProductId]()
+			device = self.attached_device()
+			if device.idProduct in self.supportedIdProductsMap:
+				return self.supportedIdProductsMap[device.idProduct](device)
 		else:
 			print 'This platform (%s) is not supported' % self.platform
 			sys.exit(1)
 
-	def attached_device_product_id(self):
+	def attached_device(self):
 		if self.ledAddress is None:
 			devices = usb.core.find(find_all=True, idVendor=0x0fc5)
 		else:
@@ -106,7 +106,7 @@ class UsbLedFinder:
 			print 'No devices found.  Exiting'
 			sys.exit(1)
 		else:
-			return devices[0].idProduct
+			return devices[0]
 
 class HudsonBuildLight:
 	def __init__(self, host, port, jobs, ledAddress=None):
