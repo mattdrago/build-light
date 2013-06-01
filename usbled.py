@@ -11,11 +11,14 @@ except Exception:
 
 class UsbLed:
 	def __init__(self, device):
-		self.color_method_map = { 'red':self.red, 'green':self.green, 'blue':self.blue, 'off':self.off }
 		self.dev = device
 		self.__register_device()
 		atexit.register(self.off)
 
+		self.GREEN = 0x01
+		self.RED = 0x02
+		self.BLUE = 0x04
+		
 	def __register_device(self):
 		if self.dev is None:
 			raise ValueError('Device must be supplied')
@@ -26,29 +29,30 @@ class UsbLed:
 		self.dev.set_configuration()
 
 	def red(self):
-		self.led_on(0x02)
+		self.led_on(self.RED)
 
 	def green(self):
-		self.led_on(0x01)
+		self.led_on(self.GREEN)
 
 	def blue(self):
-		self.led_on(0x04)
+		self.led_on(self.BLUE)
 
 	def red_flash(self):
-		self.led_flash(0x02)
+		self.led_flash(self.RED)
 
 	def green_flash(self):
-		self.led_flash(0x01)
+		self.led_flash(self.GREEN)
 
 	def blue_flash(self):
-		self.led_flash(0x04)
+		self.led_flash(self.BLUE)
 
 	def off(self):
 		self.all_off()
 
-	def set_color(self, color):
-		if color in self.color_method_map.keys():
-			self.color_method_map[color]()
+	def set_color(self, color_name):
+		color_method = getattr(self, color_name, None)
+		if color_method:
+			color_method()
 
 class UsbLedGen1(UsbLed):
 	
