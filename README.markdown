@@ -27,3 +27,9 @@ References for libusb code:
 
  * http://www.linuxjournal.com/article/7466?page=0,1
  * http://pyusb.sourceforge.net/docs/1.0/tutorial.html
+
+Delcom Technical Resources
+
+ * http://www.delcomproducts.com/tech.asp
+ * http://www.delcomproducts.com/downloads/USBIODS.pdf
+ * http://www.delcomproducts.com/downloads/USBIOHID.pdf
