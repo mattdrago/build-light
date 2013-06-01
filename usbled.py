@@ -44,7 +44,7 @@ class UsbLed:
 		self.led_flash(0x04)
 
 	def off(self):
-		self.led_on(0x00)
+		self.all_off()
 
 	def set_color(self, color):
 		if color in self.color_method_map.keys():
