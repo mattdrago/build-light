@@ -93,27 +93,35 @@ class UsbLedGen2(UsbLed):
 	def __init__(self, device):
 		UsbLed.__init__(self, device)
 
-	def send(self, color):
+		# Set up the flash cycle duties
+		self.send(major_command=0x65, minor_command=0x15, msb=0x21, lsb=0x2f)
+		self.send(major_command=0x65, minor_command=0x16, msb=0x21, lsb=0x2f)
+		self.send(major_command=0x65, minor_command=0x17, msb=0x21, lsb=0x2f)
+
+	def send(self, major_command, minor_command, msb, lsb, dataHid = '\x00\x00\x00\x00'):
+		command = chr(major_command) + chr(minor_command) + chr(lsb) + chr(msb) + dataHid
 		try:
 			self.dev.ctrl_transfer(bmRequestType=0x21,
 					bRequest= 0x09,
 					wValue=0x0635,
 					wIndex=0x000,
-					data_or_wLength='\x65\x0c' + chr(color) + '\xff\x00\x00\x00\x00')
+					data_or_wLength=command)
 		
 		# a pipe error is thrown even if the operation is successful
 		except usb.core.USBError:
 			pass
 
 	def led_on(self, color):
-		self.send(color)
+		self.all_off()
+		self.send(major_command=0x65, minor_command=0x0c, msb=0xff, lsb=color)
 
 	def all_off(self):
-		self.send(0x00)
+		self.send(major_command=0x65, minor_command=0x0c, msb=0xff, lsb=0x00)
+		self.send(major_command=0x65, minor_command=0x14, msb=0x00, lsb=0xff)
 
 	def led_flash(self, color):
 		self.all_off()
-		self.send(color)
+		self.send(major_command=0x65, minor_command=0x14, msb=color, lsb=0x00)
 
 class UsbLedFinder:
 	def __init__(self, ledAddress):
