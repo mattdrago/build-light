@@ -11,9 +11,11 @@ To configure the script for your hudson instance, change the following line in r
 
     build_light = HudsonBuildLight(host='127.0.0.1', port=8080, jobs=['your-job-here'])
 
-Or, if you have multiple lights attached and you know the address of the one to control.  Not specifying an address will result in teh first one found being used.
+Or, if you have multiple lights attached and you know the address of the one to control.  Not specifying an address will result in the first one found being used.
 
     build_light = HudsonBuildLight(host='127.0.0.1', port=8080, jobs=['your-job-here'], ledAddress=21)
+
+To find out the address of each light attached, use the identify.py script.  It will flash each light blue for 5 secs and print out its address.
 
 This script has been tested on generation 1 and 2 Delcom USB Visual Signal Indicator (in particular 804028 and 904005-SB)
 

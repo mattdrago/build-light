@@ -154,3 +154,13 @@ class UsbLedFinder:
 			sys.exit(1)
 		else:
 			return devices[0]
+
+def identify():
+	devices = usb.core.find(find_all=True, idVendor=0x0fc5)
+
+	for device in devices:
+		print "Flashing device with address %s, blue" % device.address
+		led = UsbLedFinder(device.address).get_usbled()
+		led.blue_flash()
+		time.sleep(5)
+		led.off()
