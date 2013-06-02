@@ -12,6 +12,9 @@ class BuildColor:
 
 		BuildColor.color_map[color] = self
 
+	def get_rank(self):
+		return self.rank
+
 def get_build_color(color):
 	if color in BuildColor.color_map.keys():
 		return BuildColor.color_map[color]
@@ -48,10 +51,7 @@ class HudsonBuildLight:
 
 	def get_color(self):
 		colors = map((lambda job: self.get_job_color(job)),self.jobs)
-		if(all(colors[0] == i for i in colors)):
-			return colors[0]
-		else:
-			return BuildColor.DEFAULT
+		return min(colors, key=BuildColor.get_rank)
 
 	def loop(self):
 		last_color = None
