@@ -9,11 +9,11 @@ It works out of the box for Linux. For MacOS libusb 1.x must be installed:
 
 To configure the script for your hudson instance, change the following line in run.py:
 
-    build_light = HudsonBuildLight(host='127.0.0.1', port=8080, job='your-job-here')
+    build_light = HudsonBuildLight(host='127.0.0.1', port=8080, jobs=['your-job-here'])
 
 Or, if you have multiple lights attached and you know the address of the one to control.  Not specifying an address will result in teh first one found being used.
 
-    build_light = HudsonBuildLight(host='127.0.0.1', port=8080, job='your-job-here', ledAddress=21)
+    build_light = HudsonBuildLight(host='127.0.0.1', port=8080, jobs=['your-job-here'], ledAddress=21)
 
 This script has been tested on generation 1 and 2 Delcom USB Visual Signal Indicator (in particular 804028 and 904005-SB)
 
